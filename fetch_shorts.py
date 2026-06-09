@@ -18,7 +18,8 @@ result = subprocess.run([
     "--no-download",
     "--no-warnings"
 ], capture_output=True, text=True)
-
+print("STDOUT:", result.stdout[:500])
+print("STDERR:", result.stderr[:500])
 # Parsing risultati
 videos = []
 seen = set()

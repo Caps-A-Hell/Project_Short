@@ -14,8 +14,6 @@ result = subprocess.run([
     "yt-dlp",
     f"ytsearch200:{query}",
     "--match-filter", "duration <= 180",
-    "--dateafter", oggi.strftime("%Y%m%d"),
-    "--datebefore", oggi.strftime("%Y%m%d"),
     "--print", "%(.{id,title,channel,channel_follower_count,duration,thumbnail})j",
     "--no-download",
     "--no-warnings"

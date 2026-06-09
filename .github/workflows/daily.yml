@@ -1,1 +1,32 @@
+name: Daily Shorts Feed
 
+on:
+  schedule:
+    - cron: '59 21 * * *'  # 23:59 ora italiana (UTC+2)
+  workflow_dispatch:  # permette di avviarlo manualmente
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install yt-dlp
+        run: pip install yt-dlp
+
+      - name: Run script
+        run: python fetch_shorts.py
+
+      - name: Commit and push index.html
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add index.html
+          git commit -m "Aggiornamento shorts $(date +'%d/%m/%Y')"
+          git push

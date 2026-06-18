@@ -73,6 +73,8 @@ def parse_duration(d):
 filtered = []
 channel_ids = set()
 for v in videos:
+    if "contentDetails" not in v or "duration" not in v["contentDetails"]:
+        continue
     duration_s = parse_duration(v["contentDetails"]["duration"])
     if duration_s <= 180:
         v["_duration_s"] = duration_s

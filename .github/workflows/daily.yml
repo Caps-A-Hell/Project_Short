@@ -1,9 +1,6 @@
 name: Daily Shorts Feed
 
 on:
-  schedule:
-    - cron: '0 10 * * *'
-    - cron: '59 21 * * *'
   workflow_dispatch:
 
 jobs:

@@ -2,6 +2,7 @@ name: Daily Shorts Feed
 
 on:
   schedule:
+    - cron: '0 10 * * *'
     - cron: '59 21 * * *'
   workflow_dispatch:
 
@@ -26,6 +27,6 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add *.html
+          git add *.html *.json
           git diff --cached --quiet || git commit -m "Aggiornamento shorts $(date +'%d/%m/%Y')"
           git push

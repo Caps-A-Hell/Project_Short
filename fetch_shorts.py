@@ -16,7 +16,12 @@ data_iso = oggi.strftime("%Y-%m-%d")
 json_path = Path(f"{data_iso}.json")
 
 
-def api_get(url):
+quota_usata = 0
+
+
+def api_get(url, costo):
+    global quota_usata
+    quota_usata += costo
     with urllib.request.urlopen(url) as response:
         return json.loads(response.read().decode())
 
@@ -38,7 +43,7 @@ video_ids = []
 next_page = ""
 for _ in range(4):  # fino a 200 risultati (4 pagine x 50)
     url = search_url + (f"&pageToken={next_page}" if next_page else "")
-    data = api_get(url)
+    data = api_get(url, costo=100)
     for item in data.get("items", []):
         vid = item["id"].get("videoId")
         if vid:
@@ -61,7 +66,7 @@ for i in range(0, len(video_ids), 50):
             "key": API_KEY
         })
     )
-    data = api_get(details_url)
+    data = api_get(details_url, costo=1)
     for item in data.get("items", []):
         videos.append(item)
 
@@ -103,7 +108,7 @@ for i in range(0, len(channel_ids), 50):
             "key": API_KEY
         })
     )
-    data = api_get(ch_url)
+    data = api_get(ch_url, costo=1)
     for item in data.get("items", []):
         channel_info[item["id"]] = item["statistics"].get("subscriberCount")
 
@@ -201,6 +206,7 @@ html = f"""<!DOCTYPE html>
 
 Path(f"{data_iso}.html").write_text(html, encoding="utf-8")
 print(f"Totale {len(tutti)} video per '{query}' ({len(nuovi)} nuovi)")
+print(f"Quota API stimata usata in questa esecuzione: {quota_usata} unità")
 
 # --- Aggiorna pagina indice ---
 index_path = Path("index.html")

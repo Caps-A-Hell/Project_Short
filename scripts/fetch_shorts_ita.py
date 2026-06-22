@@ -1,11 +1,13 @@
 import os
 import json
 import re
+import time
 import datetime
 import urllib.request
 import urllib.parse
-import time
+import urllib.error
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 API_KEY = os.environ["YOUTUBE_API_KEY"]
 
@@ -13,10 +15,12 @@ API_KEY = os.environ["YOUTUBE_API_KEY"]
 LANG_CODE = "ita"
 LANG_LABEL = "ITA"
 REGION_CODES = ["IT"]
+ORDERS = ["date"]
+MAX_PER_CHANNEL = 5
 
 mesi = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno",
         "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"]
-oggi = datetime.date.today()
+oggi = datetime.datetime.now(ZoneInfo("Europe/Rome")).date()
 query = f"{oggi.day} {mesi[oggi.month - 1]} {oggi.year}"
 data_iso = oggi.strftime("%Y-%m-%d")
 json_path = Path(f"{LANG_CODE}-{data_iso}.json")
@@ -36,37 +40,38 @@ def api_get(url, costo, tentativi=5):
             if e.code == 429 and tentativo < tentativi - 1:
                 print(f"Errore 429, attendo {attesa}s e riprovo ({tentativo + 1}/{tentativi})...")
                 time.sleep(attesa)
-                attesa *= 2  # raddoppia l'attesa ad ogni tentativo
+                attesa *= 2
             else:
                 raise
 
 
-# --- Ricerca video tramite query testuale, per ciascuna regione ---
+# --- Ricerca video tramite query testuale, per ciascuna regione e ordinamento ---
 video_ids = []
 for region in REGION_CODES:
-    search_url = (
-        "https://www.googleapis.com/youtube/v3/search?"
-        + urllib.parse.urlencode({
-            "part": "snippet",
-            "q": query,
-            "type": "video",
-            "maxResults": 50,
-            "order": "date",
-            "regionCode": region,
-            "key": API_KEY
-        })
-    )
-    next_page = ""
-    for _ in range(4):
-        url = search_url + (f"&pageToken={next_page}" if next_page else "")
-        data = api_get(url, costo=100)
-        for item in data.get("items", []):
-            vid = item["id"].get("videoId")
-            if vid:
-                video_ids.append(vid)
-        next_page = data.get("nextPageToken")
-        if not next_page:
-            break
+    for order in ORDERS:
+        search_url = (
+            "https://www.googleapis.com/youtube/v3/search?"
+            + urllib.parse.urlencode({
+                "part": "snippet",
+                "q": query,
+                "type": "video",
+                "maxResults": 50,
+                "order": order,
+                "regionCode": region,
+                "key": API_KEY
+            })
+        )
+        next_page = ""
+        for _ in range(4):
+            url = search_url + (f"&pageToken={next_page}" if next_page else "")
+            data = api_get(url, costo=100)
+            for item in data.get("items", []):
+                vid = item["id"].get("videoId")
+                if vid:
+                    video_ids.append(vid)
+            next_page = data.get("nextPageToken")
+            if not next_page:
+                break
 
 video_ids = list(dict.fromkeys(video_ids))
 
@@ -134,7 +139,7 @@ if json_path.exists():
     existing = json.loads(json_path.read_text(encoding="utf-8"))
 
 existing_ids = {item["id"] for item in existing}
-nuovi = [
+nuovi_candidati = [
     {
         "id": v["id"],
         "title": v["snippet"]["title"],
@@ -147,6 +152,19 @@ nuovi = [
     }
     for v in filtered if v["id"] not in existing_ids
 ]
+
+# --- Applica il limite massimo di video per canale, contando anche quelli già esistenti ---
+conteggio_canale = {}
+for item in existing:
+    conteggio_canale[item["channel_id"]] = conteggio_canale.get(item["channel_id"], 0) + 1
+
+nuovi = []
+for item in nuovi_candidati:
+    cid = item["channel_id"]
+    if conteggio_canale.get(cid, 0) >= MAX_PER_CHANNEL:
+        continue
+    conteggio_canale[cid] = conteggio_canale.get(cid, 0) + 1
+    nuovi.append(item)
 
 tutti = existing + nuovi
 json_path.write_text(json.dumps(tutti, ensure_ascii=False), encoding="utf-8")
@@ -226,5 +244,5 @@ html = f"""<!DOCTYPE html>
 </html>"""
 
 Path(f"{LANG_CODE}-{data_iso}.html").write_text(html, encoding="utf-8")
-print(f"[{LANG_CODE.upper()}] Totale {len(tutti)} video per '{query}' ({len(nuovi)} nuovi)")
+print(f"[{LANG_CODE.upper()}] Totale {len(tutti)} video per '{query}' ({len(nuovi)} nuovi, {len(nuovi_candidati) - len(nuovi)} scartati per limite canale)")
 print(f"[{LANG_CODE.upper()}] Quota API stimata usata in questa esecuzione: {quota_usata} unità")

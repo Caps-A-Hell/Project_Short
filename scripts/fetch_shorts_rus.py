@@ -4,6 +4,7 @@ import re
 import datetime
 import urllib.request
 import urllib.parse
+import time
 from pathlib import Path
 
 API_KEY = os.environ["YOUTUBE_API_KEY"]
@@ -23,13 +24,21 @@ json_path = Path(f"{LANG_CODE}-{data_iso}.json")
 quota_usata = 0
 
 
-def api_get(url, costo):
+def api_get(url, costo, tentativi=5):
     global quota_usata
     quota_usata += costo
-    with urllib.request.urlopen(url) as response:
-        return json.loads(response.read().decode())
-
-
+    attesa = 5
+    for tentativo in range(tentativi):
+        try:
+            with urllib.request.urlopen(url) as response:
+                return json.loads(response.read().decode())
+        except urllib.error.HTTPError as e:
+            if e.code == 429 and tentativo < tentativi - 1:
+                print(f"Errore 429, attendo {attesa}s e riprovo ({tentativo + 1}/{tentativi})...")
+                time.sleep(attesa)
+                attesa *= 2  # raddoppia l'attesa ad ogni tentativo
+            else:
+                raise
 # --- Ricerca video tramite query testuale, per ciascuna regione ---
 video_ids = []
 for region in REGION_CODES:

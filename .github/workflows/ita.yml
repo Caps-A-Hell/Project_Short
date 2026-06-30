@@ -26,7 +26,7 @@ jobs:
       - name: Commit and push changes
         run: |
           git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git add *.html *.json
+          git config user.email "github-actions@github.com   "
+          git add -A
           git diff --cached --quiet || git commit -m "Aggiornamento Shorts ITA $(date +'%d/%m/%Y %H:%M')"
           git push

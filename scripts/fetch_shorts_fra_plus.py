@@ -16,7 +16,7 @@ LANG_CODE = "fra"
 LANG_LABEL = "FRA"
 REGION_CODES = ["FR"]
 ORDERS = ["date", "relevance"]
-MAX_PER_CHANNEL = 5
+MAX_PER_CHANNEL = 3
 
 mesi = ["janvier", "février", "mars", "avril", "mai", "juin",
         "juillet", "août", "septembre", "octobre", "novembre", "décembre"]

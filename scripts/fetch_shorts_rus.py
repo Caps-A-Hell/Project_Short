@@ -16,7 +16,7 @@ LANG_CODE = "rus"
 LANG_LABEL = "RUS"
 REGION_CODES = ["RU"]
 ORDERS = ["date"]
-MAX_PER_CHANNEL = 5
+MAX_PER_CHANNEL = 3
 
 mesi_gen = ["января", "февраля", "марта", "апреля", "мая", "июня",
             "июля", "августа", "сентября", "октября", "ноября", "декабря"]

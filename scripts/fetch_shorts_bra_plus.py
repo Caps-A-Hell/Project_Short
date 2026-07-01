@@ -16,7 +16,7 @@ LANG_CODE = "bra"
 LANG_LABEL = "BRA"
 REGION_CODES = ["BR"]
 ORDERS = ["date", "relevance"]
-MAX_PER_CHANNEL = 5
+MAX_PER_CHANNEL = 3
 
 meses = ["janeiro", "fevereiro", "março", "abril", "maio", "junho",
          "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"]

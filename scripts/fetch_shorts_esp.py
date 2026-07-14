@@ -20,7 +20,7 @@ MAX_PER_CHANNEL = 3
 
 meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio",
          "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
-oggi = datetime.datetime.now(ZoneInfo("Europe/Madrid)).date()
+oggi = datetime.datetime.now(ZoneInfo("Europe/Madrid")).date()
 query = f"{oggi.day} de {meses[oggi.month - 1]} de {oggi.year}"
 data_iso = oggi.strftime("%Y-%m-%d")
 json_path = Path(f"{LANG_CODE}-{data_iso}.json")

@@ -1,0 +1,57 @@
+name: Shorts PLUS - Avvio Sequenziale
+
+on:
+  workflow_dispatch:
+
+permissions:
+  actions: write
+
+jobs:
+  avvia_tutti:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Avvia ITA Plus
+        run: |
+          echo "Avvio Shorts ITA Plus..."
+          gh workflow run ita_plus.yml --ref main
+
+      - name: Attesa casuale prima di FRA Plus
+        run: |
+          WAIT=$(( (RANDOM % 40) + 20 ))
+          echo "Attendo ${WAIT}s prima del prossimo avvio..."
+          sleep $WAIT
+
+      - name: Avvia FRA Plus
+        run: |
+          echo "Avvio Shorts FRA Plus..."
+          gh workflow run fra_plus.yml --ref main
+
+      - name: Attesa casuale prima di ESP Plus
+        run: |
+          WAIT=$(( (RANDOM % 40) + 20 ))
+          echo "Attendo ${WAIT}s prima del prossimo avvio..."
+          sleep $WAIT
+
+      - name: Avvia ESP Plus
+        run: |
+          echo "Avvio Shorts ESP Plus..."
+          gh workflow run esp_plus.yml --ref main
+
+      - name: Attesa casuale prima di GER Plus
+        run: |
+          WAIT=$(( (RANDOM % 40) + 20 ))
+          echo "Attendo ${WAIT}s prima del prossimo avvio..."
+          sleep $WAIT
+
+      - name: Avvia GER Plus
+        run: |
+          echo "Avvio Shorts GER Plus..."
+          gh workflow run ger_plus.yml --ref main
+
+      - name: Riepilogo
+        run: echo "Tutti e 4 i workflow Plus sono stati avviati in sequenza."

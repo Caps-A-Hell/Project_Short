@@ -9,11 +9,12 @@ LANG_INFO = {
     "rus": {"label": "RUS", "flag": "🇷🇺"},
     "fra": {"label": "FRA", "flag": "🇫🇷"},
     "ger": {"label": "GER", "flag": "🇩🇪"},
+    "uk": {"label": "UK", "flag": "🇬🇧"},
 }
 
 GIORNI_CONSERVAZIONE = 3
 
-pattern = re.compile(r"^(ita|esp|bra|rus|fra|ger)-(\d{4}-\d{2}-\d{2})\.(html|json)$")
+pattern = re.compile(r"^(ita|esp|bra|rus|fra|ger|uk)-(\d{4}-\d{2}-\d{2})\.(html|json)$")
 
 # --- Cancellazione automatica dei file più vecchi della soglia ---
 oggi = datetime.date.today()
